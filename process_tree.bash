@@ -47,7 +47,7 @@ bf_script_view() {
         produce_output=1
 
         #Check if this PID is already in the global list (output has already been produced)
-		#If it is, switch to not produce any output
+        #If it is, switch to not produce any output
         for GLOBAL_LIST_PID in `echo "${GLOBAL_LIST}" | tr ',' '\n' `
         do
             if [ $USERPID -eq $GLOBAL_LIST_PID ]
@@ -99,4 +99,3 @@ bf_session_view() {
 
     done
 }
-
