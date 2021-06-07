@@ -4,11 +4,13 @@ hbf_date_loop_help() {
     echo "    -e  : End Date   YYYY-MM-DD"
     echo "    -c  : Command (string)"
     echo "    -f  : Format (see date command man page for formats)"
+    echo "    -q  : quiet (don't output extra control information)"
     echo " -h -H  : Help (this text)"
     echo ""
     echo "Examples:"
     echo 'bf_date_loop -s "2018-04-28" -e "2018-05-03" -c "echo date: " -f "%Y%m%d"'
     echo 'bf_date_loop -s "2018-04-28" -e "2018-05-03" -c "date --date " -f "%F"'
+    echo 'bf_date_loop -s "2021-01-01" -e "2021-04-30" -c "date +%F --date " -f "%F" -q'
 }
 
 
@@ -45,9 +47,10 @@ bf_date_loop() {
     local -i edate_set=0
     local -i command_set=0
     local -i format_set=0
- 
+    local -i quiet_set=0
+
     #options that require a further argument mut be followed by a further argument, if not they are passed to the case ":"
-    while getopts "s:e:c:f:hH" opt
+    while getopts "s:e:c:f:qhH" opt
     do
         case $opt in
             s)
@@ -77,6 +80,9 @@ bf_date_loop() {
             c)
                 local -x command="$OPTARG"
                 command_set=1
+                ;;
+            q)
+                quiet_set=1
                 ;;
             f)
                 local -x format="$OPTARG"
@@ -135,9 +141,12 @@ bf_date_loop() {
         return 1
     fi
  
-    echo "Loop From: $(date +"${format}" -d "${sdate}")"
-    echo "       To: $(date +"${format}" -d "${edate}")"
-    echo "=================================="
+    if [[ ${quiet_set} -eq 0 ]]
+    then
+      echo "Loop From: $(date +"${format}" -d "${sdate}")"
+      echo "       To: $(date +"${format}" -d "${edate}")"
+      echo "=================================="
+    fi
 
     #Current date (we want to start from start date)
     declare -i cdate=$(date +"%Y%m%d" -d "${sdate}")
@@ -147,11 +156,22 @@ bf_date_loop() {
     do
       #Processing date (with a different format to the numerical counters)
       pdate=$(date +"${format}" -d "${cdate}")
-      echo "Processing command  : ${command}"
-      echo "Processing for date : ${pdate}"
+
+      if [[ ${quiet_set} -eq 0 ]]
+      then
+        echo "Processing command  : ${command}"
+        echo "Processing for date : ${pdate}"
+      fi
+
       ${command} "${pdate}"
+
       cdate=$(date +"%Y%m%d" -d "${cdate} + 1 day" )
-      echo "=================================="
+
+      if [[ ${quiet_set} -eq 0 ]]
+      then
+        echo "=================================="
+      fi
+
     done
 }
 
