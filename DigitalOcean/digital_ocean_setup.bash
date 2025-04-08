@@ -9,6 +9,14 @@ check_sudo_root() {
   local max_attempts=3
 
   while true; do
+
+    if ! command -v sudo >/dev/null 2>&1; then
+      echo "sudo is not installed."
+      exit 1
+    fi
+
+    sudo -v # Test sudo is working
+    
     if sudo -n true 2>/dev/null; then
       if sudo whoami | grep -q '^root$'; then
         echo "Sudo access and root permissions are working."
